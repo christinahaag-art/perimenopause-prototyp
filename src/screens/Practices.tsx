@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Icon from '../components/Icon';
+import Kopf from '../components/Kopf';
 import Photo from '../components/Photo';
 import TabBar from '../components/TabBar';
 import { MATCHING, Practice, PRACTICES } from '../data';
@@ -28,7 +29,7 @@ function PracticeCard({ p, recommended }: { p: Practice; recommended: boolean })
     <button
       className={`card${recommended ? ' card--highlight' : ''}`}
       onClick={() => navigate(`/fachpraxis/${p.id}`)}
-      style={{ width: '100%', padding: 16, display: 'block' }}
+      style={{ width: '100%', padding: 20, display: 'block' }}
       aria-label={`${p.name}, ${p.role}, ${p.distance}${recommended ? ', passt zu deinem Muster' : ''}`}
     >
       <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
@@ -63,9 +64,10 @@ export default function Practices() {
 
   return (
     <>
-      <main className="screen screen--padded anim-fade" aria-labelledby="pr-title">
-        <h1 id="pr-title" className="t-h2" style={{ marginTop: 64 }}>Fachpraxen für Perimenopause</h1>
-        <div className="chip-row" style={{ margin: '16px 0' }} role="radiogroup" aria-label="Versicherung">
+      <main className="screen anim-fade" aria-label="Fachpraxen">
+        <Kopf overline="Geprüft für Perimenopause" title="Fachpraxen" illustration="fachpraxen" />
+        <div className="below-kopf">
+        <div className="chip-row" style={{ margin: '0 0 16px' }} role="radiogroup" aria-label="Versicherung">
           {(['Gesetzlich', 'Privat / Selbstzahler'] as const).map((c) => (
             <button key={c} role="radio" aria-checked={ins === c} className={`chip${ins === c ? ' chip--selected' : ''}`} onClick={() => setIns(ins === c ? null : c)}>
               {ins === c && <Icon name="check" size={16} stroke={2.2} />}
@@ -86,11 +88,11 @@ export default function Practices() {
           ))}
         </div>
 
-        <button className="t-caption" style={{ display: 'block', margin: '20px auto', fontWeight: 700, textDecoration: 'underline', textUnderlineOffset: 3 }} onClick={() => info('Hier würde der Suchradius erweitert, zum Beispiel auf 10 km.')}>
+        <button className="t-caption" style={{ display: 'block', margin: '24px auto', fontWeight: 700, textDecoration: 'underline', textUnderlineOffset: 3 }} onClick={() => info('Hier würde der Suchradius erweitert, zum Beispiel auf 10 km.')}>
           Keine passende dabei? Umkreis erweitern
         </button>
 
-        <section className="card" aria-label="Passend zu deinem Muster">
+        <section className="card" style={{ marginTop: 0 }} aria-label="Passend zu deinem Muster">
           <p className="t-overline c-primary">Passend zu deinem Muster</p>
           <p className="t-body" style={{ margin: '6px 0 14px' }}>
             Deine häufigsten Symptome: <b>Schlafprobleme, Hitzewallungen</b>. Alle Praxen hier sind zur Perimenopause fortgebildet und kennen diese Beschwerden.
@@ -106,7 +108,7 @@ export default function Practices() {
           </div>
         </section>
 
-        <div className="hint" style={{ marginTop: 16, flexDirection: 'column', gap: 8 }}>
+        <div className="hint" style={{ marginTop: 24, flexDirection: 'column', gap: 8 }}>
           <div style={{ display: 'flex', gap: 12 }}>
             <Icon name="shield" size={20} />
             <span>Die <b>Fortbildung zur Perimenopause</b> ist bei allen Praxen nachgewiesen. Den Termin vereinbarst du direkt mit der Praxis.</span>
@@ -114,6 +116,7 @@ export default function Practices() {
           <button className="link link--underline" style={{ color: 'var(--text)', marginLeft: 32 }} onClick={() => info('Wir prüfen bei jeder Praxis den Nachweis einer Fortbildung zur Perimenopause und wiederholen die Prüfung regelmäßig.', 'So prüfen wir')}>
             So prüfen wir
           </button>
+        </div>
         </div>
         <div className="tab-space" />
       </main>

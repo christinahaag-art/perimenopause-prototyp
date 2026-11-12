@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Icon from '../components/Icon';
+import Kopf from '../components/Kopf';
 import TabBar from '../components/TabBar';
-import { SEV_LABEL, TODAY_LABEL } from '../data';
+import { DAYS, fmtDay, maxSeverity, SEV_LABEL, SEV_RANK, SEV_TITLE, Severity, TODAY_LABEL, WEEKDAYS_LONG } from '../data';
 import { useApp } from '../state/AppState';
 
 export function Splash() {
@@ -18,17 +19,8 @@ export function Splash() {
   );
 }
 
-function StartImage() {
-  const [failed, setFailed] = useState(false);
-  if (failed) {
-    return (
-      <div aria-hidden="true" style={{ height: 256, borderRadius: 16, background: 'linear-gradient(160deg, #f3f0fa, #ede9f7)', display: 'grid', placeItems: 'center' }}>
-        <img src="/img/gespeichert.svg" alt="" width={180} style={{ opacity: 0.55, filter: 'saturate(.6)' }} />
-      </div>
-    );
-  }
-  return <img src="/img/start.jpg" alt="" onError={() => setFailed(true)} style={{ height: 256, width: '100%', objectFit: 'contain', borderRadius: 16 }} />;
-}
+// Letzte 7 Tage: Di 29.9. – Mo 5.10. (heute)
+const WEEK = DAYS.slice(-7);
 
 export default function Start() {
   const navigate = useNavigate();
@@ -37,48 +29,79 @@ export default function Start() {
     resetDraft();
     navigate('/eintragen');
   };
+  const todaySev = saved ? saved.symptoms.reduce<Severity | undefined>((best, x) => (!best || SEV_RANK[x.severity] > SEV_RANK[best] ? x.severity : best), undefined) : undefined;
+  const entries = WEEK.filter((d, i) => (i === 6 ? !!todaySev : !!maxSeverity(d, 'Alle'))).length;
 
   return (
     <>
-      <main className="screen screen--padded anim-fade">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 48 }}>
-          <p className="t-caption c-2">{TODAY_LABEL}</p>
-          <span aria-label="Profil" style={{ width: 40, height: 40, borderRadius: '50%', display: 'grid', placeItems: 'center', background: 'var(--surface-subtle)', boxShadow: 'inset 0 0 0 1px var(--border)', fontWeight: 600 }}>C</span>
-        </div>
-        <p className="t-body-l c-2" style={{ marginTop: 20 }}>Hallo,</p>
-        <h1 className="t-h1" style={{ fontSize: 32, lineHeight: '40px' }}>Christina</h1>
-
-        <div style={{ margin: '20px 0 16px' }}>
-          <StartImage />
-        </div>
-
-        {saved ? (
-          <section className="card" aria-label="Heute eingetragen">
-            <p className="t-overline c-success">Heute eingetragen</p>
-            <ul style={{ listStyle: 'none', padding: 0, margin: '10px 0 8px' }}>
-              {saved.symptoms.map((s) => (
-                <li key={s.name} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '2px 0' }}>
-                  <span className={`sev-dot sev-dot--${s.severity.toLowerCase()}`} />
-                  <span className="t-strong" style={{ flex: 1 }}>{s.name}</span>
-                  <span className="t-caption c-2">{SEV_LABEL[s.severity]}</span>
-                </li>
-              ))}
-            </ul>
-            <p className="t-body c-2" style={{ marginBottom: 16 }}>Gespeichert um {saved.time} Uhr.</p>
-            <button className="btn btn--secondary" onClick={goEntry}>
-              <Icon name="plus" size={20} /> Eintrag ergänzen
-            </button>
+      <main className="screen anim-fade">
+        <Kopf overline={TODAY_LABEL} title="Hallo, Sandra" illustration="start" profile />
+        <div className="below-kopf sections">
+          <section className="section" aria-label="Deine Woche">
+            <div className="section__head">
+              <h2 className="t-h3">Deine Woche</h2>
+              <span className="t-caption c-2">{entries} Einträge</span>
+            </div>
+            <div className="week">
+              {WEEK.map((d, i) => {
+                const isToday = i === 6;
+                const s = isToday ? todaySev : maxSeverity(d, 'Alle');
+                return (
+                  <div key={d.date.toISOString()} className="week__day">
+                    <span className="week__label">{WEEKDAYS_LONG[d.date.getDay()]}</span>
+                    <span className={`cal__cell${s ? ` cal__cell--${s.toLowerCase()}` : ''}${isToday ? ' cal__cell--today' : ''}`} aria-label={`${fmtDay(d.date)}${s ? `, ${SEV_LABEL[s]}` : ', kein Eintrag'}`}>
+                      {s && <span className={`cal__pill cal__pill--${s.toLowerCase()}`} />}
+                      <span className="cal__num">{d.date.getDate()}</span>
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
           </section>
-        ) : (
-          <section className="card card--tint" aria-label="Heute">
-            <p className="t-overline c-2">Heute</p>
-            <h2 className="t-h2" style={{ marginTop: 4 }}>Noch kein Eintrag</h2>
-            <p className="t-body c-2" style={{ margin: '4px 0 18px' }}>Symptome und Periode – dauert weniger als eine Minute.</p>
-            <button className="btn btn--primary" onClick={goEntry}>
-              <Icon name="plus" size={20} /> Heute eintragen
-            </button>
+
+          <button className="row-card" onClick={() => navigate('/muster')}>
+            <span style={{ flex: 1 }}>
+              <span className="t-overline c-2" style={{ display: 'block' }}>Dein Muster</span>
+              <span className="t-strong" style={{ display: 'block' }}>Schlafprobleme an 9 von 28 Tagen</span>
+            </span>
+            <Icon name="chevronRight" size={20} color="var(--primary)" />
+          </button>
+
+          <section className="section" aria-label="Heute">
+            <h2 className="t-h3">Heute</h2>
+            {saved ? (
+              <div className="card stack" style={{ gap: 20 }}>
+                <div className="stack" style={{ gap: 8 }}>
+                  <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                    {saved.symptoms.map((s) => (
+                      <li key={s.name} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '2px 0' }}>
+                        <span className="t-body c-2" style={{ flex: 1 }}>{s.name}</span>
+                        <span className={`sev-dot sev-dot--${s.severity.toLowerCase()}`} />
+                        <span className="t-strong">{SEV_TITLE[s.severity]}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="t-body c-2" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <Icon name="check" size={18} color="var(--primary)" /> Gespeichert um {saved.time} Uhr
+                  </p>
+                </div>
+                <button className="btn btn--secondary" onClick={goEntry}>
+                  <Icon name="plus" size={20} /> Eintrag ergänzen
+                </button>
+              </div>
+            ) : (
+              <div className="card stack" style={{ gap: 20 }}>
+                <div className="stack" style={{ gap: 4 }}>
+                  <p className="t-strong">Noch kein Eintrag</p>
+                  <p className="t-body c-2">Symptome und Periode – dauert weniger als eine Minute.</p>
+                </div>
+                <button className="btn btn--primary" onClick={goEntry}>
+                  <Icon name="plus" size={20} /> Heute eintragen
+                </button>
+              </div>
+            )}
           </section>
-        )}
+        </div>
         <div className="tab-space" />
       </main>
       <TabBar />

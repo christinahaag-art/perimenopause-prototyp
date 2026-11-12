@@ -1,4 +1,4 @@
-import { DAYS, fmtDate, LAST_PERIOD, SYMPTOMS, WEEKDAYS_LONG, countSymptom } from '../data';
+import { DAYS, fmtDate, LAST_PERIOD, SEV_LABEL, SYMPTOMS, WEEKDAYS_LONG, countSymptom } from '../data';
 
 const SHORT: Record<string, string> = {
   Hitzewallungen: 'Hitze-\nwallungen',
@@ -33,7 +33,7 @@ export function DiaryPage() {
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, background: 'var(--tint)', borderRadius: 4, padding: '5px 8px', marginBottom: 6 }}>
         <div><b style={{ color: 'var(--primary)' }}>ÜBERBLICK</b><br />Beschwerden an 12 von 30 Tagen, meist mittel bis stark</div>
-        <div><b style={{ color: 'var(--primary)' }}>AM HÄUFIGSTEN</b><br />Schlafprobleme 9× · Hitzewallungen 7× · Erschöpfung 5× · Stimmungsschw. 3×</div>
+        <div><b style={{ color: 'var(--primary)' }}>AM HÄUFIGSTEN</b><br />Schlafprobleme 9× · Hitzewallungen 7× · Erschöpfung 5×</div>
         <div><b style={{ color: 'var(--primary)' }}>PERIODE</b><br />Letzte Periode begonnen: 14.09.2026 (3 Tage)</div>
       </div>
       <table>
@@ -61,7 +61,7 @@ export function DiaryPage() {
               <td>{day.period ? <span className="per" /> : ''}</td>
               {ORDER.map((s) => {
                 const v = day.symptoms[s];
-                return <td key={s}>{v ? <span className={`sev sev--${v}`}>{v}</span> : ''}</td>;
+                return <td key={s}>{v ? <span className={`sev sev--${v}`}>{SEV_LABEL[v]}</span> : ''}</td>;
               })}
               <td />
               <td className="l" style={{ color: 'var(--text-2)' }}>{day.note ?? ''}</td>
@@ -71,9 +71,9 @@ export function DiaryPage() {
       </table>
       <div style={{ display: 'flex', gap: 12, marginTop: 6, color: 'var(--text-2)', alignItems: 'center' }}>
         <b style={{ color: 'var(--text)' }}>Stärke:</b>
-        <span><span className="sev sev--L">L</span> leicht – kaum spürbar, Alltag wie gewohnt</span>
-        <span><span className="sev sev--M">M</span> mittel – deutlich spürbar, aber machbar</span>
-        <span><span className="sev sev--S">S</span> stark – schränkt im Alltag ein</span>
+        <span><span className="sev-key sev--L" />leicht – kaum spürbar, Alltag wie gewohnt</span>
+        <span><span className="sev-key sev--M" />mittel – deutlich spürbar, aber machbar</span>
+        <span><span className="sev-key sev--S" />stark – schränkt im Alltag ein</span>
         <span><span className="per" /> Periode · Zyklustag 1 = erster Tag der Periode</span>
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4, color: 'var(--text-2)' }}>

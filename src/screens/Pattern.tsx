@@ -1,9 +1,10 @@
 import { ReactNode, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DiaryThumb } from '../components/Diary';
+import DiaryCard from '../components/DiaryCard';
+import Kopf from '../components/Kopf';
 import Icon from '../components/Icon';
 import TabBar from '../components/TabBar';
-import { CAL_DAYS, countSymptom, Day, fmtDay, fmtLong, maxSeverity, PATTERN_FILTERS, SEV_LABEL, SEV_RANK, Severity, Symptom, WEEKDAYS } from '../data';
+import { CAL_DAYS, countSymptom, Day, fmtDay, fmtLong, maxSeverity, SEV_LABEL, SEV_RANK, Severity, SHORT_NAME, Symptom, symptomsByFrequency, WEEKDAYS } from '../data';
 import { useApp } from '../state/AppState';
 
 type Filter = Symptom | 'Alle';
@@ -70,9 +71,13 @@ function summary(f: Filter): ReactNode {
 
 export default function Pattern() {
   const navigate = useNavigate();
-  const { open, info, lastPeriod } = useApp();
+  const { open, info, lastPeriod, patternFilter: filter, setPatternFilter: setFilter } = useApp();
   const [range, setRange] = useState('30 Tage');
-  const [filter, setFilter] = useState<Filter>('Alle');
+  // Filter „Häufigste + weitere“: Alle + 2 häufigste (oder der aktive) + „+ N weitere“
+  const freq = symptomsByFrequency();
+  const top = freq.slice(0, 2).map((x) => x.s);
+  const visible: Symptom[] = filter === 'Alle' || top.includes(filter as Symptom) ? top : [filter as Symptom];
+  const more = freq.length - visible.length;
   const [selected, setSelected] = useState(() => CAL_DAYS.findIndex((d) => d.date.getMonth() === 8 && d.date.getDate() === 29));
 
   const daysWith = useMemo(() => CAL_DAYS.filter((d) => maxSeverity(d, filter)), [filter]);
@@ -87,8 +92,10 @@ export default function Pattern() {
 
   return (
     <>
-      <main className="screen screen--padded anim-fade" aria-label="Dein Muster">
-        <div className="segment" style={{ marginTop: 56 }} role="group" aria-label="Zeitraum">
+      <main className="screen anim-fade" aria-label="Dein Muster">
+        <Kopf overline="Was deine Einträge zeigen" title="Dein Muster" illustration="muster" />
+        <div className="below-kopf">
+        <div className="segment" role="group" aria-label="Zeitraum">
           {['14 Tage', '30 Tage', '3 Monate'].map((r) => (
             <button key={r} aria-pressed={range === r} onClick={() => (r === '30 Tage' ? setRange(r) : (setRange(r), info('Im Prototyp zeigen alle Zeiträume die Daten der letzten 30 Tage.')))}>
               {r}
@@ -96,18 +103,23 @@ export default function Pattern() {
           ))}
         </div>
 
-        <section className="card card--highlight" style={{ marginTop: 20 }} aria-label="Zusammenfassung">
+        <section className="card card--highlight" style={{ marginTop: 24 }} aria-label="Zusammenfassung">
           <p className="t-overline" style={{ marginBottom: 6 }}>Zusammenfassung</p>
           <p className="t-body-l">{summary(filter)}</p>
         </section>
 
-        <h2 className="t-h2" style={{ margin: '28px 0 14px' }}>Deine letzten 4 Wochen</h2>
-        <div className="chip-scroll" role="radiogroup" aria-label="Symptom-Filter">
-          {PATTERN_FILTERS.map((f) => (
+        <h2 className="t-h2" style={{ margin: '24px 0 12px' }}>Deine letzten 4 Wochen</h2>
+        <div className="chip-row" style={{ gap: 8, flexWrap: 'nowrap' }} role="radiogroup" aria-label="Symptom-Filter">
+          {(['Alle', ...visible] as Filter[]).map((f) => (
             <button key={f} role="radio" aria-checked={filter === f} className={`chip${filter === f ? ' chip--selected' : ''}`} onClick={() => setFilter(f)}>
-              {f}
+              {f === 'Alle' ? 'Alle' : SHORT_NAME[f as Symptom] ?? f}
             </button>
           ))}
+          {more > 0 && (
+            <button className="chip chip--add" style={{ fontWeight: 500 }} onClick={() => open({ kind: 'symptoms' })}>
+              + {more} weitere
+            </button>
+          )}
         </div>
         <p className="t-caption" style={{ margin: '14px 0 12px', fontSize: 15 }}>
           {filter === 'Alle' ? 'Beschwerden' : filter} an <b>{daysWith.length} von 28 Tagen</b>, meist <b>{dominant(daysWith, filter)}</b>.
@@ -160,17 +172,12 @@ export default function Pattern() {
           </p>
         </div>
 
-        <button className="card card--primary" onClick={() => open({ kind: 'pdf' })} style={{ display: 'flex', gap: 14, alignItems: 'center', width: '100%', padding: 12, marginTop: 16 }}>
-          <DiaryThumb width={124} />
-          <span>
-            <span className="t-strong" style={{ display: 'block', fontSize: 17 }}>Symptomtagebuch</span>
-            <span className="t-caption" style={{ display: 'block', opacity: 0.85 }}>PDF für deinen Arzttermin · A4 · letzte 30 Tage</span>
-            <span className="t-caption" style={{ fontWeight: 700 }}>Ansehen &amp; sichern ›</span>
-          </span>
-        </button>
+        <div style={{ marginTop: 24 }}>
+          <DiaryCard link="Ansehen & sichern ›" onClick={() => open({ kind: 'pdf' })} />
+        </div>
 
         {ex.title && (
-          <section className="card card--tint" style={{ marginTop: 16 }} aria-label="Was bedeutet das?">
+          <section className="card card--tint" style={{ marginTop: 24 }} aria-label="Was bedeutet das?">
             <p className="t-overline c-2">Was bedeutet das?</p>
             <h3 className="t-h2" style={{ fontSize: 20, lineHeight: '26px', margin: '6px 0 10px' }}>{ex.title}</h3>
             <p className="t-body">{ex.text}</p>
@@ -182,7 +189,7 @@ export default function Pattern() {
         )}
 
         {filter === 'Schlafprobleme' && (
-          <section className="card" style={{ marginTop: 16 }} aria-label="Was dir helfen kann">
+          <section className="card" style={{ marginTop: 24 }} aria-label="Was dir helfen kann">
             <p className="t-overline c-2">Was dir helfen kann</p>
             <h3 className="t-h2" style={{ fontSize: 20, margin: '6px 0 12px' }}>Besser schlafen</h3>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: 8 }}>
@@ -198,7 +205,7 @@ export default function Pattern() {
         )}
 
         {filter === 'Alle' && (
-          <section className="card" style={{ marginTop: 16 }} aria-label="Was du am häufigsten bemerkt hast">
+          <section className="card" style={{ marginTop: 24 }} aria-label="Was du am häufigsten bemerkt hast">
             <h3 className="t-h2" style={{ fontSize: 20, lineHeight: '26px', marginBottom: 16 }}>Was du am häufigsten bemerkt hast</h3>
             {bars.map((b) => (
               <div key={b.s} style={{ marginBottom: 14 }}>
@@ -212,9 +219,10 @@ export default function Pattern() {
           </section>
         )}
 
-        <div className="hint" style={{ marginTop: 16 }}>
+        <div className="hint" style={{ marginTop: 24 }}>
           <Icon name="info" size={20} />
           <span>Diese Kombination ist in der Perimenopause häufig. Das ist <b>keine Diagnose</b>. Eine Fachpraxis für Perimenopause kann das mit dir einordnen.</span>
+        </div>
         </div>
         <div style={{ height: 200 }} />
       </main>

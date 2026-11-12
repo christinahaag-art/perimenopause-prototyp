@@ -105,7 +105,7 @@ export const MATCHING = ['Schlafprobleme', 'Hitzewallungen'];
 export const PRACTICES: Practice[] = [
   {
     id: 'berger',
-    name: 'Dr. Annerose Berger',
+    name: 'Dr. Anna Berger',
     practice: 'Praxis am Helmholtzplatz',
     role: 'Frauenärztin',
     distance: '1,2 km',
@@ -169,3 +169,9 @@ export const fmtDate = (x: Date) => `${String(x.getDate()).padStart(2, '0')}.${S
 const MONTHS = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
 export const fmtLong = (x: Date) => `${x.getDate()}. ${MONTHS[x.getMonth()]}`;
 export const fmtDay = (x: Date) => `${WEEKDAYS_LONG[x.getDay()]}, ${fmtLong(x)}`;
+
+/** Symptome mit Einträgen im Zeitraum, nach Häufigkeit sortiert (für den Muster-Filter). */
+export function symptomsByFrequency(days = DAYS): { s: Symptom; n: number }[] {
+  return SYMPTOMS.map((s) => ({ s, n: countSymptom(s, days) })).filter((x) => x.n > 0).sort((a, b) => b.n - a.n);
+}
+export const SHORT_NAME: Partial<Record<Symptom, string>> = { Schlafprobleme: 'Schlaf', Hitzewallungen: 'Hitze', Stimmungsschwankungen: 'Stimmung' };

@@ -16,9 +16,9 @@ export default function Entry() {
         <button aria-label="Schließen" onClick={() => navigate(-1)} style={{ marginTop: 36, width: 44, height: 44, marginLeft: -10, display: 'grid', placeItems: 'center' }}>
           <Icon name="x" />
         </button>
-        <h1 id="entry-title" className="t-h1" style={{ marginTop: 2 }}>Symptom eintragen</h1>
+        <h1 id="entry-title" className="t-h1" style={{ marginTop: 2, marginBottom: 32 }}>Symptom eintragen</h1>
 
-        <h2 className="t-h3" style={{ margin: '12px 0 10px', fontWeight: 700, fontSize: 19 }}>Wann?</h2>
+        <h2 className="t-h3" style={{ margin: '0 0 12px', fontWeight: 700, fontSize: 19 }}>Wann?</h2>
         <div className="chip-row" role="radiogroup" aria-label="Wann?">
           {WHEN.map((w) => {
             const sel = when === w;
@@ -37,7 +37,7 @@ export default function Entry() {
           })}
         </div>
 
-        <h2 className="t-h3" style={{ margin: '20px 0 10px', fontWeight: 700, fontSize: 19 }}>Was hast du bemerkt?</h2>
+        <h2 className="t-h3" style={{ margin: '24px 0 12px', fontWeight: 700, fontSize: 19 }}>Was hast du bemerkt?</h2>
         <div className="chip-row">
           {SYMPTOMS.map((s) => {
             const sev = draft[s];
@@ -62,7 +62,7 @@ export default function Entry() {
 
         <button
           onClick={() => open({ kind: 'period' })}
-          style={{ marginTop: 20, width: '100%', display: 'flex', alignItems: 'center', gap: 12, minHeight: 52, padding: '0 14px 0 16px', borderRadius: 12, background: 'var(--tint)' }}
+          style={{ marginTop: 24, width: '100%', display: 'flex', alignItems: 'center', gap: 12, minHeight: 52, padding: '0 14px 0 16px', borderRadius: 12, background: 'var(--tint)' }}
         >
           <Icon name="calendar" size={20} color="var(--primary)" />
           <span className="t-strong" style={{ flex: 1 }}>{periodSetInEntry ? `Letzte Periode: ${fmtDate(lastPeriod)}` : 'Letzte Periode eintragen'}</span>
@@ -70,7 +70,7 @@ export default function Entry() {
           <Icon name="chevronRight" size={20} />
         </button>
 
-        <label htmlFor="note" style={{ display: 'flex', alignItems: 'baseline', gap: 8, margin: '24px 0 8px' }}>
+        <label htmlFor="note" style={{ display: 'flex', alignItems: 'baseline', gap: 8, margin: '24px 0 12px' }}>
           <span className="t-h3" style={{ fontWeight: 700, fontSize: 19 }}>Notiz</span>
           <span className="t-caption c-2">optional</span>
         </label>
@@ -85,7 +85,7 @@ export default function Entry() {
         <div style={{ height: 130 }} />
       </main>
 
-      <div className="fixed-cta" style={{ bottom: 34 }}>
+      <div className="fixed-cta" style={{ bottom: 0, paddingBottom: 34, background: '#fff' }}>
         <button
           className="btn btn--primary"
           disabled={count === 0}

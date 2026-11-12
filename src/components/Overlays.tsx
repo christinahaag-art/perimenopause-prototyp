@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { DiaryPage, DiaryThumb } from './Diary';
+import { DiaryPage } from './Diary';
+import DiaryCard from './DiaryCard';
 import Icon from './Icon';
-import { PRACTICES, SEV_HINT, SEV_TITLE, Severity } from '../data';
+import { PRACTICES, SEV_HINT, SEV_TITLE, Severity, symptomsByFrequency, SYMPTOMS } from '../data';
 import { Overlay, useApp } from '../state/AppState';
 
 function Sheet({ children, onClose, label }: { children: React.ReactNode; onClose: () => void; label: string }) {
@@ -98,34 +99,37 @@ function DiarySheet({ practiceId }: { practiceId: string }) {
   const p = PRACTICES.find((x) => x.id === practiceId) ?? PRACTICES[0];
   return (
     <Sheet onClose={close} label="Symptomtagebuch">
-      <p className="t-overline c-2">6. Sep – 5. Okt 2026</p>
-      <h2 className="t-h2" style={{ margin: '2px 0 12px' }}>Symptomtagebuch</h2>
-      <p className="t-body" style={{ marginBottom: 12 }}>An <b>12 von 30 Tagen</b> Beschwerden eingetragen, meist <b>mittel bis stark</b>.</p>
-      <p className="t-body c-2" style={{ marginBottom: 16 }}>
-        Nimm diese Übersicht zu deinem Termin mit – ausgedruckt oder auf dem Handy. So sieht deine Ärztin auf einen Blick, wann welche Beschwerden aufgetreten sind und wann deine Periode war.
-      </p>
-      <button className="card card--tint" onClick={() => open({ kind: 'pdf' })} style={{ display: 'flex', gap: 14, alignItems: 'center', width: '100%', padding: 14 }}>
-        <DiaryThumb width={116} />
-        <span>
-          <span className="t-strong" style={{ display: 'block' }}>Dein Tagebuch als PDF</span>
-          <span className="t-caption c-2" style={{ display: 'block' }}>A4 · 30 Tage · Symptome, Stärke und Periode</span>
-          <span className="link">Vorschau ansehen ›</span>
-        </span>
-      </button>
-      <div className="hint" style={{ margin: '12px 0 20px' }}>
-        <Icon name="info" size={20} />
-        <span>Das ist keine Diagnose. Es hilft dir, im Gespräch nichts zu vergessen.</span>
+      <div className="stack" style={{ gap: 24 }}>
+        <div>
+          <p className="t-overline c-2">6. Sep – 5. Okt 2026</p>
+          <h2 className="t-h2">Symptomtagebuch</h2>
+        </div>
+        <div className="stack" style={{ gap: 12 }}>
+          <p className="t-body">An <b>12 von 30 Tagen</b> Beschwerden eingetragen, meist <b>mittel bis stark</b>.</p>
+          <p className="t-body c-2">
+            Nimm diese Übersicht zu deinem Termin mit – ausgedruckt oder auf dem Handy. So sieht deine Ärztin auf einen Blick, wann welche Beschwerden aufgetreten sind und wann deine Periode war.
+          </p>
+        </div>
+        <div className="stack" style={{ gap: 12 }}>
+          <DiaryCard link="Vorschau ansehen ›" onClick={() => open({ kind: 'fullpdf' })} />
+          <div className="hint">
+            <Icon name="info" size={20} />
+            <span>Das ist keine Diagnose. Es hilft dir, im Gespräch nichts zu vergessen.</span>
+          </div>
+        </div>
+        <div className="stack" style={{ gap: 12 }}>
+          <button className="btn btn--primary" onClick={() => info('Hier würde das Symptomtagebuch als PDF auf deinem Handy gespeichert.')}>
+            <Icon name="download" size={20} /> Als PDF sichern
+          </button>
+          <div className="stack" style={{ gap: 8 }}>
+            <button className="btn btn--secondary" onClick={() => open({ kind: 'send', practiceId: p.id })}>An Praxis senden</button>
+            <p className="t-caption c-2" style={{ textAlign: 'center' }}>
+              Wenn du schon einen Termin bei {p.name} hast – nur mit deiner Zustimmung.
+            </p>
+          </div>
+        </div>
       </div>
-      <div className="stack" style={{ gap: 12 }}>
-        <button className="btn btn--primary" onClick={() => info('Hier würde das Symptomtagebuch als PDF auf deinem Handy gespeichert.')}>
-          <Icon name="download" size={20} /> Als PDF sichern
-        </button>
-        <button className="btn btn--outline-dark" onClick={() => open({ kind: 'send', practiceId: p.id })}>An Praxis senden</button>
-      </div>
-      <p className="t-caption c-2" style={{ textAlign: 'center', margin: '10px 0 4px' }}>
-        Wenn du schon einen Termin bei {p.name} hast – nur mit deiner Zustimmung.
-      </p>
-      <button className="btn btn--text" onClick={() => {
+      <button className="btn btn--text" style={{ marginTop: 8 }} onClick={() => {
         if (typeof navigator.share === 'function') navigator.share({ title: 'Symptomtagebuch', text: 'Mein Symptomtagebuch aus Perino (Prototyp)' }).catch(() => undefined);
         else info('Hier würde sich das Teilen-Menü deines Handys öffnen.');
       }}>Anders teilen …</button>
@@ -134,18 +138,92 @@ function DiarySheet({ practiceId }: { practiceId: string }) {
 }
 
 function PdfSheet() {
-  const { close, info } = useApp();
+  const { open, close, info } = useApp();
+  const rows: [string, string][] = [
+    ['Beschwerden', 'An 12 von 30 Tagen, meist mittel bis stark'],
+    ['Am häufigsten', 'Schlafprobleme 9× · Hitzewallungen 7× · Erschöpfung 5×'],
+    ['Letzte Periode', 'Begonnen am 14.09.2026 (3 Tage)'],
+  ];
   return (
     <Sheet onClose={close} label="Vorschau Symptomtagebuch">
-      <h2 className="t-h2" style={{ marginBottom: 8 }}>Vorschau · Symptomtagebuch</h2>
-      <p className="t-body c-2" style={{ marginBottom: 16 }}>A4 quer · 06.09.–05.10.2026 · zum Ausdrucken oder Zeigen auf dem Handy</p>
-      <div style={{ borderRadius: 8, boxShadow: '0 0 0 1px var(--border), 0 4px 16px rgba(0,0,0,.08)', overflow: 'hidden', marginBottom: 20 }}>
-        <div style={{ overflowX: 'auto' }}>
-          <DiaryThumb width={350} />
+      <div className="stack" style={{ gap: 24 }}>
+        <div>
+          <p className="t-overline c-2">Vorschau · 06.09.–05.10.2026</p>
+          <h2 className="t-h2">Das steht in deinem PDF</h2>
+        </div>
+        <div className="card card--tint stack" style={{ gap: 12, padding: 16 }}>
+          {rows.map(([l, v]) => (
+            <div key={l}>
+              <p className="t-caption c-2">{l}</p>
+              <p className="t-strong">{v}</p>
+            </div>
+          ))}
+        </div>
+        <DiaryCard title="Ganze Seite ansehen" sub="A4 quer · zum Vergrößern im Vollbild öffnen" link="Vollbild ansehen ›" onClick={() => open({ kind: 'fullpdf' })} />
+        <div className="stack" style={{ gap: 4 }}>
+          <button className="btn btn--primary" onClick={() => info('Hier würde das Symptomtagebuch als PDF auf deinem Handy gespeichert.')}>
+            <Icon name="download" size={20} /> Als PDF sichern
+          </button>
+          <button className="btn btn--text" onClick={close}>Schließen</button>
         </div>
       </div>
-      <button className="btn btn--primary" onClick={() => info('Hier würde das Symptomtagebuch als PDF auf deinem Handy gespeichert.')}>Als PDF sichern</button>
-      <button className="btn btn--text" style={{ marginTop: 4 }} onClick={close}>Schließen</button>
+    </Sheet>
+  );
+}
+
+/** PDF im Vollbild: Tippen wechselt zwischen „ganze Seite“ und Originalgröße (zum Verschieben). */
+function FullPdf() {
+  const { close, info } = useApp();
+  const [zoom, setZoom] = useState(false);
+  const scale = zoom ? 1 : 358 / 842;
+  return (
+    <div className="pdf-full" role="dialog" aria-modal="true" aria-label="Symptomtagebuch im Vollbild">
+      <div className="pdf-full__bar">
+        <button aria-label="Schließen" onClick={close}><Icon name="x" /></button>
+        <span className="t-strong">Symptomtagebuch</span>
+        <button aria-label="Als PDF sichern" onClick={() => info('Hier würde das Symptomtagebuch als PDF auf deinem Handy gespeichert.')}><Icon name="download" /></button>
+      </div>
+      <div className={`pdf-full__view${zoom ? ' pdf-full__view--zoom' : ''}`}>
+        <button className="pdf-full__page" style={{ width: 842 * scale, height: 595 * scale, marginLeft: zoom ? 0 : 'auto' }} onClick={() => setZoom(!zoom)} aria-label={zoom ? 'Verkleinern' : 'Vergrößern'}>
+          <div style={{ transform: `scale(${scale})`, transformOrigin: 'top left', transition: 'transform 300ms cubic-bezier(0.2, 0.8, 0.2, 1)' }}>
+            <DiaryPage />
+          </div>
+        </button>
+      </div>
+      <p className="pdf-full__hint">{zoom ? 'Wischen zum Verschieben · Tippen zum Verkleinern' : 'Tippen zum Vergrößern · mit zwei Fingern zoomen'}</p>
+    </div>
+  );
+}
+
+/** „+ N weitere“ auf Muster: alle Symptome nach Häufigkeit */
+function SymptomsSheet() {
+  const { close, patternFilter, setPatternFilter } = useApp();
+  const freq = symptomsByFrequency();
+  const none = SYMPTOMS.filter((s) => !freq.some((x) => x.s === s));
+  const opts: { key: string; label: string; value: typeof patternFilter }[] = [
+    { key: 'Alle', label: 'Alle', value: 'Alle' },
+    ...freq.map((x) => ({ key: x.s, label: `${x.s} · ${x.n} ${x.n === 1 ? 'Tag' : 'Tage'}`, value: x.s })),
+  ];
+  return (
+    <Sheet onClose={close} label="Symptom wählen">
+      <div className="stack" style={{ gap: 24 }}>
+        <div>
+          <p className="t-overline c-2">Letzte 30 Tage · nach Häufigkeit</p>
+          <h2 className="t-h2">Symptom wählen</h2>
+        </div>
+        <div className="stack" style={{ gap: 8 }} role="radiogroup" aria-label="Symptom">
+          {opts.map((o) => {
+            const sel = patternFilter === o.value;
+            return (
+              <button key={o.key} role="radio" aria-checked={sel} className={`option${sel ? ' option--selected' : ''}`} onClick={() => { setPatternFilter(o.value); close(); }}>
+                <span className="option__radio" />
+                {o.label}
+              </button>
+            );
+          })}
+        </div>
+        {none.length > 0 && <p className="t-caption c-2">Ohne Einträge in den letzten 30 Tagen: {none.join(', ')}</p>}
+      </div>
     </Sheet>
   );
 }
@@ -199,6 +277,8 @@ export default function Overlays() {
           case 'period': return <PeriodSheet key={key} />;
           case 'diary': return <DiarySheet key={key} practiceId={o.practiceId} />;
           case 'pdf': return <PdfSheet key={key} />;
+          case 'fullpdf': return <FullPdf key={key} />;
+          case 'symptoms': return <SymptomsSheet key={key} />;
           case 'send': return <SendSheet key={key} practiceId={o.practiceId} />;
           case 'info': return <InfoDialog key={key} text={o.text} title={o.title} />;
         }

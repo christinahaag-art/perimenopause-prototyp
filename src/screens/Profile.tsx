@@ -1,5 +1,5 @@
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
-import { DiaryThumb } from '../components/Diary';
+import DiaryCard from '../components/DiaryCard';
 import Icon, { IconName } from '../components/Icon';
 import Photo from '../components/Photo';
 import TabBar from '../components/TabBar';
@@ -42,7 +42,7 @@ export default function Profile() {
           <button className="btn btn--primary" style={{ marginTop: -28, position: 'relative' }} onClick={() => info('Hier würde sich die Website der Praxis öffnen (außerhalb von Perino). Dort vereinbarst du deinen Termin.')}>
             Zur Website der Praxis <Icon name="external" size={20} />
           </button>
-          <p className="t-caption c-2" style={{ textAlign: 'center', margin: '10px 16px 20px' }}>Einen Termin vereinbarst du direkt über die Website der Praxis.</p>
+          <p className="t-caption c-2" style={{ textAlign: 'center', margin: '12px 16px 24px' }}>Einen Termin vereinbarst du direkt über die Website der Praxis.</p>
 
           <section className="card" aria-label="Praxis">
             <h2 className="t-h2" style={{ marginBottom: 14 }}>Praxis</h2>
@@ -56,7 +56,7 @@ export default function Profile() {
             </ul>
           </section>
 
-          <section className="card" style={{ marginTop: 16 }} aria-label="Warum diese Ärztin?">
+          <section className="card" style={{ marginTop: 24 }} aria-label="Warum diese Ärztin?">
             <h2 className="t-h2" style={{ marginBottom: 14 }}>Warum diese Ärztin?</h2>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: 12 }}>
               {['Fortbildung „Perimenopause in der Praxis“ · 40 Stunden · abgeschlossen 2025', 'Behandelt Beschwerden in der Perimenopause', 'Nachweis zuletzt geprüft: September 2026'].map((t) => (
@@ -74,14 +74,9 @@ export default function Profile() {
             </button>
           </section>
 
-          <button className="card card--primary" onClick={() => open({ kind: 'diary', practiceId: p.id })} style={{ display: 'flex', gap: 14, alignItems: 'center', width: '100%', padding: 12, marginTop: 16 }}>
-            <DiaryThumb width={124} />
-            <span>
-              <span className="t-strong" style={{ display: 'block', fontSize: 17 }}>Symptomtagebuch</span>
-              <span className="t-caption" style={{ display: 'block', opacity: 0.85 }}>PDF für deinen Arzttermin · A4 · letzte 30 Tage</span>
-              <span className="t-caption" style={{ fontWeight: 700 }}>Ansehen &amp; sichern ›</span>
-            </span>
-          </button>
+          <div style={{ marginTop: 24 }}>
+            <DiaryCard link="Ansehen & sichern ›" onClick={() => open({ kind: 'diary', practiceId: p.id })} />
+          </div>
         </div>
         <div className="tab-space" />
       </main>

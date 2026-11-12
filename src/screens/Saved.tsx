@@ -12,9 +12,14 @@ export default function Saved() {
   return (
     <>
       <main className="screen screen--padded anim-fade" style={{ textAlign: 'center' }}>
-        <img src="/img/gespeichert.svg" alt="" width={146} height={112} style={{ margin: '120px auto 20px' }} />
+        <div className="saved-ill" style={{ margin: '120px auto 20px' }} aria-hidden="true">
+          <img src="/img/gespeichert.svg" alt="" />
+          {[[-6, 96, 18, -14], [140, 88, -16, -12], [126, 4, -14, 14], [30, 8, 16, 14]].map(([x, y, dx, dy]) => (
+            <span key={`${x}-${y}`} className="spark" style={{ left: x, top: y, ['--dx' as string]: `${dx}px`, ['--dy' as string]: `${dy}px` }} />
+          ))}
+        </div>
         <h1 className="t-h1">Gespeichert!</h1>
-        <p className="t-body-l c-2" style={{ margin: '8px 0 20px' }}>Danke, dass du dir die Zeit genommen hast. Mit jedem Eintrag wird dein Muster genauer.</p>
+        <p className="t-body-l c-2" style={{ margin: '8px 0 24px' }}>Danke, dass du dir die Zeit genommen hast. Mit jedem Eintrag wird dein Muster genauer.</p>
 
         <section className="card" style={{ textAlign: 'left' }} aria-label="Dein Eintrag">
           <p className="t-overline c-2">Dein Eintrag · {dayLabel}</p>
@@ -33,7 +38,7 @@ export default function Saved() {
           </div>
         </section>
 
-        <div className="stack" style={{ gap: 8, marginTop: 28 }}>
+        <div className="stack" style={{ gap: 8, marginTop: 24 }}>
           <button className="btn btn--primary" onClick={() => navigate('/muster')}>Dein Muster ansehen</button>
           <button className="btn btn--text" onClick={() => navigate('/start')}>Zur Startseite</button>
         </div>

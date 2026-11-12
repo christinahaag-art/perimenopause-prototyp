@@ -1,6 +1,8 @@
 import { createContext, ReactNode, useCallback, useContext, useMemo, useState } from 'react';
 import { LAST_PERIOD, Severity, Symptom } from '../data';
 
+export type PatternFilter = Symptom | 'Alle';
+
 export type When = 'Heute' | 'Gestern' | 'Datum wählen';
 
 export interface SavedEntry {
@@ -15,6 +17,8 @@ export type Overlay =
   | { kind: 'period' }
   | { kind: 'diary'; practiceId: string }
   | { kind: 'pdf' }
+  | { kind: 'fullpdf' }
+  | { kind: 'symptoms' }
   | { kind: 'send'; practiceId: string }
   | { kind: 'info'; text: string; title?: string };
 
@@ -34,6 +38,9 @@ interface State {
   lastPeriod: Date;
   setLastPeriod: (d: Date) => void;
   periodSetInEntry: boolean;
+  // Filter auf Muster
+  patternFilter: PatternFilter;
+  setPatternFilter: (f: PatternFilter) => void;
   // Overlays
   overlays: Overlay[];
   open: (o: Overlay) => void;
@@ -53,6 +60,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [lastPeriod, setLastPeriodRaw] = useState<Date>(LAST_PERIOD);
   const [periodSetInEntry, setPeriodSetInEntry] = useState(false);
   const [overlays, setOverlays] = useState<Overlay[]>([]);
+  const [patternFilter, setPatternFilter] = useState<PatternFilter>('Alle');
 
   const setSeverity = useCallback((s: Symptom, v: Severity | null) => {
     setDraft((prev) => {
@@ -102,11 +110,12 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     setSaved(null);
     setLastPeriodRaw(LAST_PERIOD);
     setOverlays([]);
+    setPatternFilter('Alle');
   }, [resetDraft]);
 
   const value = useMemo(
-    () => ({ when, setWhen, draft, setSeverity, note, setNote, resetDraft, saved, save, lastPeriod, setLastPeriod, periodSetInEntry, overlays, open, close, closeAll, info, resetAll }),
-    [when, draft, setSeverity, note, resetDraft, saved, save, lastPeriod, setLastPeriod, periodSetInEntry, overlays, open, close, closeAll, info, resetAll],
+    () => ({ when, setWhen, draft, setSeverity, note, setNote, resetDraft, saved, save, lastPeriod, setLastPeriod, periodSetInEntry, patternFilter, setPatternFilter, overlays, open, close, closeAll, info, resetAll }),
+    [when, draft, setSeverity, note, resetDraft, saved, save, lastPeriod, setLastPeriod, periodSetInEntry, patternFilter, overlays, open, close, closeAll, info, resetAll],
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

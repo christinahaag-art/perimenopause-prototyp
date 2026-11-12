@@ -54,7 +54,7 @@ function DevPanel() {
       >
         ↺ Prototyp zurücksetzen
       </button>
-      <p style={{ fontSize: 12 }}>Stand: Hi Fi, 9. November 2026</p>
+      <p style={{ fontSize: 12 }}>Stand: Hi Fi, 12. November 2026</p>
     </aside>
   );
 }
