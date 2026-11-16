@@ -285,5 +285,7 @@ b, strong { font-weight: 700; }
 /* Freigestellte Illustrationen im App-Violett, Haut und Gesicht bleiben weiß */
 .kopf__ill img { mix-blend-mode: normal; }
 .kopf__ill .kopf__hue { display: none; }
-/* Muster und Fachpraxen: Illustration kleiner, da jetzt freigestellt */
-.kopf__ill:not(.kopf__ill--start) { width: 140px; height: 150px; right: 16px; bottom: 28px; }
+/* Position und Größe exakt wie in Figma (Kopfbereich 390 × 224, Maße relativ zur rechten/oberen Kante) */
+.kopf__ill--start { right: 51px; top: 92px; bottom: auto; width: 102px; height: 111px; }
+.kopf__ill--muster { right: 14px; top: 54px; bottom: auto; width: 158px; height: 158px; }
+.kopf__ill--fachpraxen { right: -18px; top: 30px; bottom: auto; width: 192px; height: 179px; }
