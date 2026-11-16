@@ -54,7 +54,7 @@ export function DiaryPage() {
         </thead>
         <tbody>
           {DAYS.map((day) => (
-            <tr key={day.date.toISOString()} className={day.date.getDay() === 1 ? 'week' : undefined}>
+            <tr key={day.date.toISOString()} className={day.date.getDay() === 1 ? 'diary-week' : undefined}>
               <td className="l">{WEEKDAYS_LONG[day.date.getDay()]}</td>
               <td className="l">{fmtDate(day.date)}</td>
               <td>{cycleDay(day.date)}</td>
