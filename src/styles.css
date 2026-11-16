@@ -289,3 +289,5 @@ b, strong { font-weight: 700; }
 .kopf__ill--start { right: 51px; top: 92px; bottom: auto; width: 102px; height: 111px; }
 .kopf__ill--muster { right: 37px; top: 93px; bottom: auto; width: 118px; height: 109px; }
 .kopf__ill--fachpraxen { right: 25px; top: 46px; bottom: auto; width: 120px; height: 157px; }
+/* Illustrationen gespiegelt wie in Figma */
+.kopf__ill img { transform: scaleX(-1); }
